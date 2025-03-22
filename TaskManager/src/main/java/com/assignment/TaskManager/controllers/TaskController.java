@@ -4,6 +4,7 @@ import com.assignment.TaskManager.entity.Task;
 import com.assignment.TaskManager.services.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,14 +23,24 @@ public class TaskController {
         return taskService.createTask(task);
     }
 
+    //    public List<Task> getAllTask() {
+//        return taskService.getTask();
+//    }
     @GetMapping
-    public List<Task> getAllTask() {
-        return taskService.getTask();
+    public Page<Task> getAllTasks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        return taskService.getTasks(page, size, sortBy, direction);
     }
+
+
 
     @GetMapping("/{id}")
     public Task getTaskById(@PathVariable Long id) {
-        return taskService.getTaskF(id);
+        return taskService.getTask(id);
     }
 
     @PutMapping("/{id}")

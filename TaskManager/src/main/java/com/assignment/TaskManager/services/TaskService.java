@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
-
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,20 +21,15 @@ public class TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
+
     @Autowired
     private UserRepository userRepository;
 
-//    public ResponseEntity<String> createTask(Task task) {
-//        try {
-//            Task savedTask = taskRepository.save(task);
-//            return ResponseEntity.status(HttpStatus.CREATED).body("Task Created: " + savedTask.getTitle());
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating task: " + e.getMessage());
-//        }
-//    }
-
-//Need to check this
+    // ✅ Create a new task with proper validation
     public ResponseEntity<String> createTask(Task task) {
+        if (task.getTitle() == null || task.getTitle().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Task title is required");
+        }
         if (task.getAssignedTo() == null || task.getAssignedTo().getId() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Assigned user is required");
         }
@@ -47,43 +44,31 @@ public class TaskService {
         return ResponseEntity.status(HttpStatus.CREATED).body("Task Created: " + task.getTitle());
     }
 
+    // ✅ Get paginated & sorted tasks
+    public Page<Task> getTasks(int page, int size, String sortBy, String direction) {
+        if (sortBy == null || sortBy.isEmpty()) {
+            sortBy = "id"; // Default sorting field
+        }
 
-    public List<Task> getTask() {
-    return taskRepository.findAll();
-}
-//
-//    public Task getTaskF(Long Id) {
-//    taskRepository.findById(Id);
-//    if (taskRepository.existsById(Id)) {
-//    return taskRepository.findById(Id).get();
-//    }
-//    return null;
-//}
+        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return taskRepository.findAll(pageable);
+    }
 
-    public Task getTaskF(Long id){
+    // ✅ Get a single task by ID
+    public Task getTask(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
-
-//    public ResponseEntity<String> updateTask(Long id, Task updatedTask) {
-//        Task existingTask = taskRepository.findById(id)
-//                .orElseThrow(() -> new TaskNotFoundException(id));
-//
-//        existingTask.setTitle(updatedTask.getTitle());
-//        existingTask.setDescription(updatedTask.getDescription());
-//        existingTask.setStatus(updatedTask.getStatus());
-//
-//        taskRepository.save(existingTask);
-//        return ResponseEntity.ok("Task updated successfully!");
-//    }
-
-//Need to check this
+    // ✅ Update task with validation
     public ResponseEntity<String> updateTask(Long id, Task updatedTask) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
 
-        // Ensure assigned user exists
+        if (updatedTask.getTitle() == null || updatedTask.getTitle().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Task title is required");
+        }
         if (updatedTask.getAssignedTo() == null || updatedTask.getAssignedTo().getId() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Assigned user is required");
         }
@@ -102,8 +87,7 @@ public class TaskService {
         return ResponseEntity.ok("Task updated successfully!");
     }
 
-
-
+    // ✅ Delete task with error handling
     public ResponseEntity<String> deleteTask(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
@@ -111,5 +95,4 @@ public class TaskService {
         taskRepository.delete(task);
         return ResponseEntity.ok("Task deleted successfully!");
     }
-
 }
