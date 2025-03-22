@@ -20,3 +20,10 @@ Ensure the following software is installed on your system:
 1. Start PostgreSQL and create the database:  
    ```sql
    CREATE DATABASE taskmanagement;
+2.Ensure the default PostgreSQL user is correctly set up:
+ '''sql
+ CREATE USER postgres WITH PASSWORD 'postgres';
+GRANT ALL PRIVILEGES ON DATABASE taskmanagement TO postgres;
+
+'''sql
+psql -U postgres -d taskmanagement
