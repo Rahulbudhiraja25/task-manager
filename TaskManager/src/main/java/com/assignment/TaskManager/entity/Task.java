@@ -16,8 +16,8 @@ import java.time.Instant;
 @Table(name = "tasks")
 //@Getter
 //@Setter
-//@NoArgsConstructor
-//@AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Task {
     public Long getId() {
         return id;
