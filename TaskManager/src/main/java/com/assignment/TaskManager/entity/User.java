@@ -68,5 +68,5 @@ public class User {
     private String timeZone;
 
     @NotNull(message = "isActive status is required")
-    private Boolean isActive;
+    private boolean isActive;
 }

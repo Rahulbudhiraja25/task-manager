@@ -25,7 +25,7 @@ public class TaskService {
     @Autowired
     private UserRepository userRepository;
 
-    // ✅ Create a new task with proper validation
+
     public ResponseEntity<String> createTask(Task task) {
         if (task.getTitle() == null || task.getTitle().trim().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Task title is required");
@@ -44,7 +44,6 @@ public class TaskService {
         return ResponseEntity.status(HttpStatus.CREATED).body("Task Created: " + task.getTitle());
     }
 
-    // ✅ Get paginated & sorted tasks
     public Page<Task> getTasks(int page, int size, String sortBy, String direction) {
         if (sortBy == null || sortBy.isEmpty()) {
             sortBy = "id"; // Default sorting field
@@ -55,13 +54,12 @@ public class TaskService {
         return taskRepository.findAll(pageable);
     }
 
-    // ✅ Get a single task by ID
+
     public Task getTask(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
-    // ✅ Update task with validation
     public ResponseEntity<String> updateTask(Long id, Task updatedTask) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
@@ -87,7 +85,6 @@ public class TaskService {
         return ResponseEntity.ok("Task updated successfully!");
     }
 
-    // ✅ Delete task with error handling
     public ResponseEntity<String> deleteTask(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
